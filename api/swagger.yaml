@@ -1,0 +1,55 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "Grype server"
+
+basePath: /api
+
+schemes:
+  - http
+
+consumes: [ "application/json" ]
+produces: [ "application/json" ]
+
+definitions:
+  ApiResponse:
+    description: 'An object that is returned in all cases of failures.'
+    type: 'object'
+    properties:
+      message:
+        type: 'string'
+  SBOM:
+    description: 'Software Bill Of Materials to scan for vulnerabilities'
+    type: 'object'
+    properties:
+      sbom:
+        type: 'string'
+  Vulnerabilities:
+    description: 'Vulnerabilities of the scanned SBOM'
+    type: 'object'
+    properties:
+      vulnerabilities:
+        type: 'string'
+
+paths:
+  /scanSBOM:
+    post:
+      summary: 'Scan SBOM (Software Bill Of Materials) for vulnerabilities'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/SBOM'
+      responses:
+        '200':
+          description: 'status reported successfully'
+          schema:
+            $ref: '#/definitions/Vulnerabilities'
+        default:
+          $ref: '#/responses/UnknownError'
+responses:
+  UnknownError:
+    description: 'unknown error'
+    schema:
+      $ref: '#/definitions/ApiResponse'
