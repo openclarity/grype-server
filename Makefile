@@ -34,8 +34,8 @@ docker_build: ## Build Grype Server docker image
 	@(mkdir docker/artifacts && mv grype-server/bin/grype-server docker/artifacts)
 	@(cd docker && docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} . && rm -rf ./artifacts)
 
-.PHONY: docker_push
-docker_push: docker_build ## Build Grype Server docker image and push it to remote
+.PHONY: docker.push
+docker.push: docker_build ## Build Grype Server docker image and push it to remote
 	@(echo "Pushing Grype Server docker image [${DOCKER_IMAGE}:${DOCKER_TAG}] ..." )
 	@(docker push ${DOCKER_IMAGE}:${DOCKER_TAG})
 
