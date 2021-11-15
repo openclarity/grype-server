@@ -1,14 +1,7 @@
-FROM golang:1.16-alpine AS builder
-WORKDIR /go/src/github.com/Portshift/grype-server/
-COPY ./ ./
-RUN CGO_ENABLED=0 go build -o grype-server ./grype-server/cmd/grype-server/
-
 FROM registry.access.redhat.com/ubi8
 RUN yum install ca-certificates -y
-RUN mkdir /licenses
-COPY ./LICENSE /licenses/
 RUN mkdir /app
-COPY --from=builder /go/src/github.com/Portshift/grype-server/grype-server /app/grype-server
+COPY ./artifacts/grype-server /app/
 RUN chmod +x /app/grype-server
 ENTRYPOINT ["/app/grype-server"]
 
