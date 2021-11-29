@@ -78,6 +78,7 @@ func (s *Scanner) Scan(sbom64 string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to decode sbom: %v", err)
 	}
+	log.Tracef("SBOM to scan: %s", sbom)
 	doc, err := s.ScanSbomJson(string(sbom))
 	if err != nil {
 		return "", fmt.Errorf("failed to scan SBOM: %v", err)
@@ -87,6 +88,7 @@ func (s *Scanner) Scan(sbom64 string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed marshall SBOM: %v", err)
 	}
+	log.Tracef("Scan result: %s", docB)
 	doc64 := base64.StdEncoding.EncodeToString(docB)
 
 	return doc64, nil
