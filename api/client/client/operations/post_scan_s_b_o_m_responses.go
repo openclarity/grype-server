@@ -48,7 +48,7 @@ func NewPostScanSBOMOK() *PostScanSBOMOK {
 
 /* PostScanSBOMOK describes a response with status code 200, with default header values.
 
-status reported successfully
+Successful scan result of the provided SBOM
 */
 type PostScanSBOMOK struct {
 	Payload *models.Vulnerabilities

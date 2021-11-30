@@ -30,9 +30,10 @@ build: ## Build Grype Server
 .PHONY: docker_build
 docker_build: ## Build Grype Server docker image
 	@(echo "Building Grype Server docker image [${DOCKER_IMAGE}:${DOCKER_TAG}] ..." )
-	@(cd grype-server && GOOS=linux go build -o bin/grype-server cmd/grype-server/main.go)
-	@(mkdir docker/artifacts && mv grype-server/bin/grype-server docker/artifacts)
-	@(cd docker && docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} . && rm -rf ./artifacts)
+	@(docker build --progress=plain -t ${DOCKER_IMAGE}:${DOCKER_TAG} . \
+		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
+		--build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
+		--build-arg IMAGE_VERSION=${VERSION})
 
 .PHONY: docker.push
 docker.push: docker_build ## Build Grype Server docker image and push it to remote

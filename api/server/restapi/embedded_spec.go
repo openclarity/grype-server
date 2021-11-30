@@ -49,7 +49,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "status reported successfully",
+            "description": "Successful scan result of the provided SBOM",
             "schema": {
               "$ref": "#/definitions/Vulnerabilities"
             }
@@ -76,7 +76,8 @@ func init() {
       "type": "object",
       "properties": {
         "sbom": {
-          "type": "string"
+          "type": "string",
+          "format": "byte"
         }
       }
     },
@@ -85,7 +86,8 @@ func init() {
       "type": "object",
       "properties": {
         "vulnerabilities": {
-          "type": "string"
+          "type": "string",
+          "format": "byte"
         }
       }
     }
@@ -131,7 +133,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "status reported successfully",
+            "description": "Successful scan result of the provided SBOM",
             "schema": {
               "$ref": "#/definitions/Vulnerabilities"
             }
@@ -161,7 +163,8 @@ func init() {
       "type": "object",
       "properties": {
         "sbom": {
-          "type": "string"
+          "type": "string",
+          "format": "byte"
         }
       }
     },
@@ -170,7 +173,8 @@ func init() {
       "type": "object",
       "properties": {
         "vulnerabilities": {
-          "type": "string"
+          "type": "string",
+          "format": "byte"
         }
       }
     }

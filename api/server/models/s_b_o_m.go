@@ -18,7 +18,8 @@ import (
 type SBOM struct {
 
 	// sbom
-	Sbom string `json:"sbom,omitempty"`
+	// Format: byte
+	Sbom strfmt.Base64 `json:"sbom,omitempty"`
 }
 
 // Validate validates this s b o m

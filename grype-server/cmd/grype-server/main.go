@@ -37,7 +37,8 @@ func run(c *cli.Context) {
 		log.Fatalf("Failed to create scanner: %v", err)
 	}
 
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	if err := s.Start(ctx, errChan); err != nil {
 		log.Fatalf("Failed to start scanner: %v", err)

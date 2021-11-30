@@ -18,7 +18,8 @@ import (
 type Vulnerabilities struct {
 
 	// vulnerabilities
-	Vulnerabilities string `json:"vulnerabilities,omitempty"`
+	// Format: byte
+	Vulnerabilities strfmt.Base64 `json:"vulnerabilities,omitempty"`
 }
 
 // Validate validates this vulnerabilities

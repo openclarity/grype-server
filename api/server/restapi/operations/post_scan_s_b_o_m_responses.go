@@ -16,7 +16,7 @@ import (
 // PostScanSBOMOKCode is the HTTP code returned for type PostScanSBOMOK
 const PostScanSBOMOKCode int = 200
 
-/*PostScanSBOMOK status reported successfully
+/*PostScanSBOMOK Successful scan result of the provided SBOM
 
 swagger:response postScanSBOMOK
 */

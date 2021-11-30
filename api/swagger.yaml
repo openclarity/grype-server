@@ -24,12 +24,14 @@ definitions:
     properties:
       sbom:
         type: 'string'
+        format: 'byte'
   Vulnerabilities:
     description: 'Vulnerabilities of the scanned SBOM'
     type: 'object'
     properties:
       vulnerabilities:
         type: 'string'
+        format: 'byte'
 
 paths:
   /scanSBOM:
@@ -43,7 +45,7 @@ paths:
             $ref: '#/definitions/SBOM'
       responses:
         '200':
-          description: 'status reported successfully'
+          description: 'Successful scan result of the provided SBOM'
           schema:
             $ref: '#/definitions/Vulnerabilities'
         default:

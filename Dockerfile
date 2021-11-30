@@ -1,9 +1,27 @@
-FROM registry.access.redhat.com/ubi8
-RUN yum install ca-certificates -y
-RUN mkdir /app
-COPY ./artifacts/grype-server /app/
-RUN chmod +x /app/grype-server
+FROM golang:1.16.6-alpine AS builder
+
+RUN apk add --update --no-cache gcc g++
+
+WORKDIR /build
+COPY api ./api
+
+WORKDIR /build/grype-server
+COPY grype-server/go.* ./
+RUN go mod download
+
+# Copy and build backend code
+COPY grype-server .
+RUN go build -o grype-server ./cmd/grype-server/main.go
+
+FROM alpine:3.14
+
+WORKDIR /app
+
+COPY --from=builder ["/build/grype-server/grype-server", "./grype-server"]
+
 ENTRYPOINT ["/app/grype-server"]
+
+USER 1000
 
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
@@ -23,5 +41,3 @@ LABEL name="grype-server" \
       release=${IMAGE_VERSION} \
       summary="Grype scanner as a K8s server" \
       description="Running Grype scanner as a K8s server"
-
-USER 1000

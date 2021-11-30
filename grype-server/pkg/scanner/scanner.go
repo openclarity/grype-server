@@ -2,7 +2,6 @@ package scanner
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/anchore/grype/grype"
@@ -73,25 +72,20 @@ func (s *Scanner) Stop() {
 	}
 }
 
-func (s *Scanner) Scan(sbom64 string) (string, error) {
-	sbom, err := base64.StdEncoding.DecodeString(sbom64)
-	if err != nil {
-		return "", fmt.Errorf("failed to decode sbom: %v", err)
-	}
+func (s *Scanner) Scan(sbom []byte) ([]byte, error) {
 	log.Tracef("SBOM to scan: %s", sbom)
 	doc, err := s.ScanSbomJson(string(sbom))
 	if err != nil {
-		return "", fmt.Errorf("failed to scan SBOM: %v", err)
+		return nil, fmt.Errorf("failed to scan SBOM: %v", err)
 	}
 
 	docB, err := json.Marshal(doc)
 	if err != nil {
-		return "", fmt.Errorf("failed marshall SBOM: %v", err)
+		return nil, fmt.Errorf("failed to marshal scan result: %v", err)
 	}
 	log.Tracef("Scan result: %s", docB)
-	doc64 := base64.StdEncoding.EncodeToString(docB)
 
-	return doc64, nil
+	return docB, nil
 }
 
 func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
@@ -124,7 +118,7 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 }
 
 func (s *Scanner) startUpdateChecker(ctx context.Context) {
-	const checkForUpdatesIntervalSec = 10*60 // check every 10 minutes
+	const checkForUpdatesIntervalSec = 3*60*60 // check every 3 hours
 
 	go func() {
 		checkServerVersionInterval := checkForUpdatesIntervalSec * time.Second
@@ -157,7 +151,7 @@ func (s *Scanner) loadBb(cfg *db.Config) error {
 
 	status := dbCurator.Status()
 	if status.Err != nil {
-		return fmt.Errorf("loaded DB is a has a failed status: %v", status.Err)
+		return fmt.Errorf("loaded DB has a failed status: %v", status.Err)
 	}
 	store, err := dbCurator.GetStore()
 	if err != nil {
