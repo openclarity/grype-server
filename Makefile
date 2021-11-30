@@ -30,7 +30,7 @@ build: ## Build Grype Server
 .PHONY: docker_build
 docker_build: ## Build Grype Server docker image
 	@(echo "Building Grype Server docker image [${DOCKER_IMAGE}:${DOCKER_TAG}] ..." )
-	@(docker build --progress=plain -t ${DOCKER_IMAGE}:${DOCKER_TAG} . \
+	@(docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} . \
 		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		--build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
 		--build-arg IMAGE_VERSION=${VERSION})

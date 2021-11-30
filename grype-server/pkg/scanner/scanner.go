@@ -4,6 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/anchore/grype/grype"
 	grype_pkg "github.com/anchore/grype/grype/pkg"
 	"github.com/anchore/grype/grype/presenter/models"
@@ -11,12 +15,10 @@ import (
 	"github.com/anchore/syft/syft"
 	"github.com/anchore/syft/syft/format"
 	log "github.com/sirupsen/logrus"
-	"strings"
-	"sync"
-	"time"
+
+	"github.com/anchore/grype/grype/db"
 
 	"github.com/Portshift/grype-server/grype-server/pkg/rest"
-	"github.com/anchore/grype/grype/db"
 )
 
 type Config struct {
@@ -53,9 +55,9 @@ func Create(conf *Config) (*Scanner, error) {
 
 func (s *Scanner) Start(ctx context.Context, errChan chan struct{}) error {
 	dbConfig := &db.Config{
-		DBRootDir:          s.DbRootDir,
-		ListingURL:         s.DbUpdateURL,
-		ValidateByHashOnGet: false,
+		DBRootDir:           s.DbRootDir,
+		ListingURL:          s.DbUpdateURL,
+		ValidateByHashOnGet: false, // Don't validate the checksum of the DB file after DB update
 	}
 	if err := s.loadBb(dbConfig); err != nil {
 		return fmt.Errorf("failed to load DB: %v", err)
@@ -108,6 +110,14 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 		Distro: distro,
 	}
 
+	doc, err := s.scanWithRetries(packagesContext, packages)
+	if err != nil {
+		return nil, err
+	}
+	return doc, nil
+}
+
+func (s *Scanner) scan(packagesContext grype_pkg.Context, packages []grype_pkg.Package) (*models.Document, error) {
 	allMatches := grype.FindVulnerabilitiesForPackage(s.vulProvider, packagesContext.Distro, packages...)
 
 	doc, err := models.NewDocument(packages, packagesContext, allMatches, nil, s.vulMetadataProvider, nil, s.dbCurator.Status())
@@ -117,8 +127,32 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 	return &doc, nil
 }
 
+const (
+	numOfScanAttempts = 5
+	scanRetryInterval = 5 * time.Second
+)
+func (s *Scanner) scanWithRetries(packagesContext grype_pkg.Context, packages []grype_pkg.Package) (*models.Document, error) {
+	var err error
+	var ret *models.Document
+
+	for attempt := 1; attempt <= numOfScanAttempts; attempt++ {
+		ret, err = s.scan(packagesContext, packages)
+		if err != nil {
+			log.Errorf("Failed to scan (attempt %v): %v", attempt, err)
+			time.Sleep(scanRetryInterval)
+		} else {
+			return ret, nil
+		}
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan after %v attempts: %v", numOfScanAttempts, err)
+	}
+
+	return ret, nil
+}
+
 func (s *Scanner) startUpdateChecker(ctx context.Context) {
-	const checkForUpdatesIntervalSec = 3*60*60 // check every 3 hours
+	const checkForUpdatesIntervalSec = 3 * 60 * 60 // check every 3 hours
 
 	go func() {
 		checkServerVersionInterval := checkForUpdatesIntervalSec * time.Second

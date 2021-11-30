@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+
 	"github.com/Portshift/grype-server/api/server/models"
 
 	"github.com/go-openapi/loads"
