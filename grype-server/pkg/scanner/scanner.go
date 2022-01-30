@@ -11,7 +11,6 @@ import (
 	"github.com/anchore/grype/grype"
 	grype_pkg "github.com/anchore/grype/grype/pkg"
 	"github.com/anchore/grype/grype/presenter/models"
-	"github.com/anchore/grype/grype/vulnerability"
 	"github.com/anchore/syft/syft"
 	"github.com/anchore/syft/syft/format"
 	log "github.com/sirupsen/logrus"
@@ -34,8 +33,8 @@ type Scanner struct {
 	DbUpdateURL string
 
 	sync.RWMutex
-	vulProvider         *vulnerability.StoreAdapter
-	vulMetadataProvider *vulnerability.MetadataStoreAdapter
+	vulProvider         *db.VulnerabilityProvider
+	vulMetadataProvider *db.VulnerabilityMetadataProvider
 }
 
 func Create(conf *Config) (*Scanner, error) {
@@ -96,7 +95,7 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 	}
 
 	sbomReader := strings.NewReader(sbom)
-	catalog, srcMetadata, distro, _, formatOption, err := syft.Decode(sbomReader)
+	syftSbom, formatOption, err := syft.Decode(sbomReader)
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode sbom: %v", err)
 	}
@@ -104,10 +103,10 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 		return nil, fmt.Errorf("unknown SBOM format option: %v", formatOption)
 	}
 
-	packages := grype_pkg.FromCatalog(catalog)
+	packages := grype_pkg.FromCatalog(syftSbom.Artifacts.PackageCatalog)
 	packagesContext := grype_pkg.Context{
-		Source: srcMetadata,
-		Distro: distro,
+		Source: &syftSbom.Source,
+		Distro: syftSbom.Artifacts.LinuxDistribution,
 	}
 
 	doc, err := s.scanWithRetries(packagesContext, packages)
@@ -131,6 +130,7 @@ const (
 	numOfScanAttempts = 5
 	scanRetryInterval = 5 * time.Second
 )
+
 func (s *Scanner) scanWithRetries(packagesContext grype_pkg.Context, packages []grype_pkg.Package) (*models.Document, error) {
 	var err error
 	var ret *models.Document
@@ -171,7 +171,10 @@ func (s *Scanner) startUpdateChecker(ctx context.Context) {
 }
 
 func (s *Scanner) loadBb(cfg *db.Config) error {
-	dbCurator := db.NewCurator(*cfg)
+	dbCurator, err := db.NewCurator(*cfg)
+	if err != nil {
+		return fmt.Errorf("failed to create curator: %v", err)
+	}
 	updated, err := dbCurator.Update()
 	if err != nil {
 		return fmt.Errorf("failed to update DB: %v", err)
@@ -192,8 +195,8 @@ func (s *Scanner) loadBb(cfg *db.Config) error {
 		return fmt.Errorf("failed to get store: %v", err)
 	}
 
-	s.vulProvider = vulnerability.NewProviderFromStore(store)
-	s.vulMetadataProvider = vulnerability.NewMetadataStoreProvider(store)
+	s.vulProvider = db.NewVulnerabilityProvider(store)
+	s.vulMetadataProvider = db.NewVulnerabilityMetadataProvider(store)
 	s.dbCurator = &dbCurator
 
 	return nil
