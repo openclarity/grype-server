@@ -175,6 +175,11 @@ func (s *Scanner) loadBb(cfg *db.Config) error {
 	if err != nil {
 		return fmt.Errorf("failed to create curator: %v", err)
 	}
+	// Check IsUpdateAvailable() errors because in the case of errors will continue the update process.
+	// https://github.com/anchore/grype/blob/731abaab723ae8918635d4e20399ca3c00b665f4/grype/db/curator.go#L138-L143
+	if _, _, err := dbCurator.IsUpdateAvailable(); err != nil {
+		return fmt.Errorf("unable to check for vulnerability database update: %v", err)
+	}
 	updated, err := dbCurator.Update()
 	if err != nil {
 		return fmt.Errorf("failed to update DB: %v", err)
