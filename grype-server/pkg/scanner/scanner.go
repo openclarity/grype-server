@@ -9,13 +9,12 @@ import (
 	"time"
 
 	"github.com/anchore/grype/grype"
+	"github.com/anchore/grype/grype/db"
 	grype_pkg "github.com/anchore/grype/grype/pkg"
 	"github.com/anchore/grype/grype/presenter/models"
 	"github.com/anchore/syft/syft"
 	"github.com/anchore/syft/syft/format"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/anchore/grype/grype/db"
 
 	"github.com/Portshift/grype-server/grype-server/pkg/rest"
 )

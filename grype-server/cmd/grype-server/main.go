@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -21,6 +22,13 @@ const defaultChanSize = 100
 func run(c *cli.Context) {
 	logutils.InitLogs(c, os.Stdout)
 	conf := config.LoadConfig()
+
+	// remove database directory if it exists to avoid using a corrupt database
+	if _, err := os.Stat(fmt.Sprintf("%s/3", conf.DbRootDir)); !os.IsNotExist(err) {
+		if err = os.RemoveAll(fmt.Sprintf("%s/3", conf.DbRootDir)); err != nil {
+			log.Fatalf("Unable to delete existing DB directory: %v", err)
+		}
+	}
 
 	errChan := make(chan struct{}, defaultChanSize)
 
