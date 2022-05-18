@@ -10,6 +10,7 @@ const (
 	HealthCheckAddress = "HEALTH_CHECK_ADDRESS"
 	DbRootDir          = "DB_ROOT_DIR"
 	DbUpdateURL        = "DB_UPDATE_URL"
+	DbDirName          = "DB_DIR_NAME"
 )
 
 type Config struct {
@@ -18,6 +19,7 @@ type Config struct {
 	HealthCheckAddress string
 	DbRootDir          string
 	DbUpdateURL        string
+	DbDirName          string
 }
 
 func LoadConfig() *Config {
@@ -28,6 +30,7 @@ func LoadConfig() *Config {
 	config.HealthCheckAddress = viper.GetString(HealthCheckAddress)
 	config.DbRootDir = viper.GetString(DbRootDir)
 	config.DbUpdateURL = viper.GetString(DbUpdateURL)
+	config.DbDirName = viper.GetString(DbDirName)
 
 	return config
 }

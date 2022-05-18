@@ -9,13 +9,12 @@ import (
 	"time"
 
 	"github.com/anchore/grype/grype"
+	"github.com/anchore/grype/grype/db"
 	grype_pkg "github.com/anchore/grype/grype/pkg"
 	"github.com/anchore/grype/grype/presenter/models"
 	"github.com/anchore/syft/syft"
 	"github.com/anchore/syft/syft/format"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/anchore/grype/grype/db"
 
 	"github.com/Portshift/grype-server/grype-server/pkg/rest"
 )
@@ -174,6 +173,11 @@ func (s *Scanner) loadBb(cfg *db.Config) error {
 	dbCurator, err := db.NewCurator(*cfg)
 	if err != nil {
 		return fmt.Errorf("failed to create curator: %v", err)
+	}
+	// Inside the dbCurator.Update() the dbCurator.IsUpdateAvailable() is called, and if it returns an error the update won't stop just log the error.
+	// https://github.com/anchore/grype/blob/731abaab723ae8918635d4e20399ca3c00b665f4/grype/db/curator.go#L138-L143
+	if _, _, err := dbCurator.IsUpdateAvailable(); err != nil {
+		return fmt.Errorf("unable to check for vulnerability database update: %v", err)
 	}
 	updated, err := dbCurator.Update()
 	if err != nil {

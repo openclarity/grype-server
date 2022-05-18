@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -21,6 +22,14 @@ const defaultChanSize = 100
 func run(c *cli.Context) {
 	logutils.InitLogs(c, os.Stdout)
 	conf := config.LoadConfig()
+
+	// remove database directory if it exists to avoid using a corrupt database
+	dbDir := fmt.Sprintf("%s/%s", conf.DbRootDir, conf.DbDirName)
+	if _, err := os.Stat(dbDir); !os.IsNotExist(err) {
+		if err = os.RemoveAll(dbDir); err != nil {
+			log.Fatalf("Unable to delete existing DB directory: %v", err)
+		}
+	}
 
 	errChan := make(chan struct{}, defaultChanSize)
 
@@ -64,6 +73,7 @@ func main() {
 	viper.SetDefault(config.HealthCheckAddress, ":8080")
 	viper.SetDefault(config.DbRootDir, "/app/")
 	viper.SetDefault(config.DbUpdateURL, "https://toolbox-data.anchore.io/grype/databases/listing.json")
+	viper.SetDefault(config.DbDirName, "3")
 	viper.AutomaticEnv()
 
 	app := cli.NewApp()
