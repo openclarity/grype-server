@@ -24,8 +24,9 @@ func run(c *cli.Context) {
 	conf := config.LoadConfig()
 
 	// remove database directory if it exists to avoid using a corrupt database
-	if _, err := os.Stat(fmt.Sprintf("%s/3", conf.DbRootDir)); !os.IsNotExist(err) {
-		if err = os.RemoveAll(fmt.Sprintf("%s/3", conf.DbRootDir)); err != nil {
+	dbDir := fmt.Sprintf("%s/3", conf.DbRootDir)
+	if _, err := os.Stat(dbDir); !os.IsNotExist(err) {
+		if err = os.RemoveAll(dbDir); err != nil {
 			log.Fatalf("Unable to delete existing DB directory: %v", err)
 		}
 	}
