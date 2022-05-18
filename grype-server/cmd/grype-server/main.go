@@ -24,7 +24,7 @@ func run(c *cli.Context) {
 	conf := config.LoadConfig()
 
 	// remove database directory if it exists to avoid using a corrupt database
-	dbDir := fmt.Sprintf("%s/3", conf.DbRootDir)
+	dbDir := fmt.Sprintf("%s/%s", conf.DbRootDir, conf.SqliteVersion)
 	if _, err := os.Stat(dbDir); !os.IsNotExist(err) {
 		if err = os.RemoveAll(dbDir); err != nil {
 			log.Fatalf("Unable to delete existing DB directory: %v", err)
