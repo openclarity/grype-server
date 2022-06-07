@@ -16,3 +16,9 @@ require (
 )
 
 replace github.com/Portshift/grype-server/api v0.0.0 => ./../api
+
+// some replace to fix high/critical vulnerabilities
+replace (
+	github.com/containerd/containerd => github.com/containerd/containerd v1.6.1
+	github.com/hashicorp/go-getter => github.com/hashicorp/go-getter v1.6.1
+)
