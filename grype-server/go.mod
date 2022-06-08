@@ -16,3 +16,12 @@ require (
 )
 
 replace github.com/Portshift/grype-server/api v0.0.0 => ./../api
+
+// some replace to fix high/critical vulnerabilities
+// fix github.com/containerd/containerd GHSA-crp2-qrr5-8pq7
+// fix github.com/hashicorp/go-getter GHSA-x24g-9w7v-vprh, GHSA-fcgg-rvwg-jv58, GHSA-28r2-q6m8-9hpx, GHSA-cjr4-fv6c-f3mv
+// remove them after github.com/anchore/grype and github.com/anchore/syft upgrade
+replace (
+	github.com/containerd/containerd => github.com/containerd/containerd v1.6.1
+	github.com/hashicorp/go-getter => github.com/hashicorp/go-getter v1.6.1
+)
