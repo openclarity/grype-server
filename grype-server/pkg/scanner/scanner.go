@@ -12,8 +12,8 @@ import (
 	"github.com/anchore/grype/grype/db"
 	grype_pkg "github.com/anchore/grype/grype/pkg"
 	"github.com/anchore/grype/grype/presenter/models"
+	"github.com/anchore/grype/grype/store"
 	"github.com/anchore/syft/syft"
-	"github.com/anchore/syft/syft/format"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/Portshift/grype-server/grype-server/pkg/rest"
@@ -98,11 +98,11 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode sbom: %v", err)
 	}
-	if formatOption == format.UnknownFormatOption {
+	if err := formatOption.Validate(sbomReader); err != nil {
 		return nil, fmt.Errorf("unknown SBOM format option: %v", formatOption)
 	}
 
-	packages := grype_pkg.FromCatalog(syftSbom.Artifacts.PackageCatalog)
+	packages := grype_pkg.FromCatalog(syftSbom.Artifacts.PackageCatalog, grype_pkg.ProviderConfig{})
 	packagesContext := grype_pkg.Context{
 		Source: &syftSbom.Source,
 		Distro: syftSbom.Artifacts.LinuxDistribution,
@@ -116,7 +116,12 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 }
 
 func (s *Scanner) scan(packagesContext grype_pkg.Context, packages []grype_pkg.Package) (*models.Document, error) {
-	allMatches := grype.FindVulnerabilitiesForPackage(s.vulProvider, packagesContext.Distro, packages...)
+	store := store.Store{
+		Provider:          s.vulProvider,
+		MetadataProvider:  s.vulMetadataProvider,
+		ExclusionProvider: nil,
+	}
+	allMatches := grype.FindVulnerabilitiesForPackage(store, packagesContext.Distro, nil, packages)
 
 	doc, err := models.NewDocument(packages, packagesContext, allMatches, nil, s.vulMetadataProvider, nil, s.dbCurator.Status())
 	if err != nil {
@@ -176,7 +181,7 @@ func (s *Scanner) loadBb(cfg *db.Config) error {
 	}
 	// Inside the dbCurator.Update() the dbCurator.IsUpdateAvailable() is called, and if it returns an error the update won't stop just log the error.
 	// https://github.com/anchore/grype/blob/731abaab723ae8918635d4e20399ca3c00b665f4/grype/db/curator.go#L138-L143
-	if _, _, err := dbCurator.IsUpdateAvailable(); err != nil {
+	if _, _, _, err := dbCurator.IsUpdateAvailable(); err != nil {
 		return fmt.Errorf("unable to check for vulnerability database update: %v", err)
 	}
 	updated, err := dbCurator.Update()
@@ -194,13 +199,17 @@ func (s *Scanner) loadBb(cfg *db.Config) error {
 	if status.Err != nil {
 		return fmt.Errorf("loaded DB has a failed status: %v", status.Err)
 	}
-	store, err := dbCurator.GetStore()
+	storeReader, dbCloser, err := dbCurator.GetStore()
+	defer dbCloser.Close()
 	if err != nil {
 		return fmt.Errorf("failed to get store: %v", err)
 	}
 
-	s.vulProvider = db.NewVulnerabilityProvider(store)
-	s.vulMetadataProvider = db.NewVulnerabilityMetadataProvider(store)
+	s.vulProvider, err = db.NewVulnerabilityProvider(storeReader)
+	if err != nil {
+		return fmt.Errorf("failed to get vulnerability provider: %v", err)
+	}
+	s.vulMetadataProvider = db.NewVulnerabilityMetadataProvider(storeReader)
 	s.dbCurator = &dbCurator
 
 	return nil
