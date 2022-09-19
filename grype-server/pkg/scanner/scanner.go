@@ -100,8 +100,13 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode sbom: %v", err)
 	}
+
+	// Validate returns error despite the syftSbom is valid so just log error and continue
 	if err := formatOption.Validate(sbomReader); err != nil {
-		return nil, fmt.Errorf("unknown SBOM format option: %v", formatOption)
+		log.Errorf("unknown SBOM format option: %v, %v", formatOption.ID().String(), err)
+	}
+	if syftSbom.Artifacts.PackageCatalog == nil {
+		return nil, fmt.Errorf("packagecatalog is empty")
 	}
 
 	packages := grype_pkg.FromCatalog(syftSbom.Artifacts.PackageCatalog, grype_pkg.ProviderConfig{})
