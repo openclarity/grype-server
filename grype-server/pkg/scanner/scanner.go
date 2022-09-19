@@ -10,6 +10,7 @@ import (
 
 	"github.com/anchore/grype/grype"
 	"github.com/anchore/grype/grype/db"
+	"github.com/anchore/grype/grype/matcher"
 	grype_pkg "github.com/anchore/grype/grype/pkg"
 	"github.com/anchore/grype/grype/presenter/models"
 	"github.com/anchore/grype/grype/store"
@@ -34,6 +35,7 @@ type Scanner struct {
 	sync.RWMutex
 	vulProvider         *db.VulnerabilityProvider
 	vulMetadataProvider *db.VulnerabilityMetadataProvider
+	exclusionProvider   *db.MatchExclusionProvider
 }
 
 func Create(conf *Config) (*Scanner, error) {
@@ -119,9 +121,11 @@ func (s *Scanner) scan(packagesContext grype_pkg.Context, packages []grype_pkg.P
 	store := store.Store{
 		Provider:          s.vulProvider,
 		MetadataProvider:  s.vulMetadataProvider,
-		ExclusionProvider: nil,
+		ExclusionProvider: s.exclusionProvider,
 	}
-	allMatches := grype.FindVulnerabilitiesForPackage(store, packagesContext.Distro, nil, packages)
+
+	matchers := matcher.NewDefaultMatchers(matcher.Config{})
+	allMatches := grype.FindVulnerabilitiesForPackage(store, packagesContext.Distro, matchers, packages)
 
 	doc, err := models.NewDocument(packages, packagesContext, allMatches, nil, s.vulMetadataProvider, nil, s.dbCurator.Status())
 	if err != nil {
@@ -200,7 +204,9 @@ func (s *Scanner) loadBb(cfg *db.Config) error {
 		return fmt.Errorf("loaded DB has a failed status: %v", status.Err)
 	}
 	storeReader, dbCloser, err := dbCurator.GetStore()
-	defer dbCloser.Close()
+	if dbCloser != nil {
+		defer dbCloser.Close()
+	}
 	if err != nil {
 		return fmt.Errorf("failed to get store: %v", err)
 	}
@@ -210,6 +216,7 @@ func (s *Scanner) loadBb(cfg *db.Config) error {
 		return fmt.Errorf("failed to get vulnerability provider: %v", err)
 	}
 	s.vulMetadataProvider = db.NewVulnerabilityMetadataProvider(storeReader)
+	s.exclusionProvider = db.NewMatchExclusionProvider(storeReader)
 	s.dbCurator = &dbCurator
 
 	return nil
