@@ -109,7 +109,9 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 		return nil, fmt.Errorf("packagecatalog is empty")
 	}
 
-	packages := grype_pkg.FromCatalog(syftSbom.Artifacts.PackageCatalog, grype_pkg.ProviderConfig{})
+	packages := grype_pkg.FromCatalog(syftSbom.Artifacts.PackageCatalog, grype_pkg.ProviderConfig{
+		GenerateMissingCPEs: true,
+	})
 	packagesContext := grype_pkg.Context{
 		Source: &syftSbom.Source,
 		Distro: syftSbom.Artifacts.LinuxDistribution,
@@ -208,10 +210,8 @@ func (s *Scanner) loadBb(cfg *db.Config) error {
 	if status.Err != nil {
 		return fmt.Errorf("loaded DB has a failed status: %v", status.Err)
 	}
-	storeReader, dbCloser, err := dbCurator.GetStore()
-	if dbCloser != nil {
-		defer dbCloser.Close()
-	}
+	storeReader, _, err := dbCurator.GetStore()
+
 	if err != nil {
 		return fmt.Errorf("failed to get store: %v", err)
 	}
