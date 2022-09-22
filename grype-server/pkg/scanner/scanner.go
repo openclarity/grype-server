@@ -101,10 +101,6 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 		return nil, fmt.Errorf("unable to decode sbom: %v", err)
 	}
 
-	// Validate returns error despite the syftSbom is valid so just log error and continue
-	if err := formatOption.Validate(sbomReader); err != nil {
-		log.Errorf("unknown SBOM format option: %v, %v", formatOption.ID().String(), err)
-	}
 	if syftSbom.Artifacts.PackageCatalog == nil {
 		return nil, fmt.Errorf("packagecatalog is empty")
 	}
