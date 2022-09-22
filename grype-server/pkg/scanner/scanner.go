@@ -96,7 +96,7 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 	}
 
 	sbomReader := strings.NewReader(sbom)
-	syftSbom, formatOption, err := syft.Decode(sbomReader)
+	syftSbom, _, err := syft.Decode(sbomReader)
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode sbom: %v", err)
 	}
