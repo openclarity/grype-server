@@ -6,11 +6,10 @@ package client
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"github.com/Portshift/grype-server/api/client/client/operations"
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
-
-	"github.com/Portshift/grype-server/api/client/client/operations"
 )
 
 // Default grype server HTTP client.

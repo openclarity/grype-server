@@ -1,4 +1,4 @@
-FROM golang:1.16.6-alpine AS builder
+FROM golang:1.19.1-alpine AS builder
 
 RUN apk add --update --no-cache gcc g++
 
@@ -13,7 +13,7 @@ RUN go mod download
 COPY grype-server .
 RUN go build -o grype-server ./cmd/grype-server/main.go
 
-FROM alpine:3.14
+FROM alpine:3.16
 
 WORKDIR /app
 
