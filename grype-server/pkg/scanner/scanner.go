@@ -11,6 +11,13 @@ import (
 	"github.com/anchore/grype/grype"
 	"github.com/anchore/grype/grype/db"
 	"github.com/anchore/grype/grype/matcher"
+	"github.com/anchore/grype/grype/matcher/dotnet"
+	"github.com/anchore/grype/grype/matcher/golang"
+	"github.com/anchore/grype/grype/matcher/java"
+	"github.com/anchore/grype/grype/matcher/javascript"
+	"github.com/anchore/grype/grype/matcher/python"
+	"github.com/anchore/grype/grype/matcher/ruby"
+	"github.com/anchore/grype/grype/matcher/stock"
 	grype_pkg "github.com/anchore/grype/grype/pkg"
 	"github.com/anchore/grype/grype/presenter/models"
 	"github.com/anchore/grype/grype/store"
@@ -19,6 +26,12 @@ import (
 
 	"github.com/Portshift/grype-server/grype-server/pkg/rest"
 )
+
+const (
+	// From https://github.com/anchore/grype/blob/v0.50.1/internal/config/datasources.go#L10
+	defaultMavenBaseURL = "https://search.maven.org/solrsearch/select"
+)
+
 
 type Config struct {
 	RestServerPort int
@@ -127,7 +140,32 @@ func (s *Scanner) scan(packagesContext grype_pkg.Context, packages []grype_pkg.P
 		ExclusionProvider: s.exclusionProvider,
 	}
 
-	matchers := matcher.NewDefaultMatchers(matcher.Config{})
+	matchers := matcher.NewDefaultMatchers(matcher.Config{
+		Java: java.MatcherConfig{
+			// Disable searching maven external source (this is the default for grype CLI too)
+			SearchMavenUpstream: false,
+			MavenBaseURL: defaultMavenBaseURL,
+			UseCPEs: true,
+		},
+		Ruby: ruby.MatcherConfig{
+			UseCPEs: true,
+		},
+		Python: python.MatcherConfig{
+			UseCPEs: true,
+		},
+		Dotnet: dotnet.MatcherConfig{
+			UseCPEs: true,
+		},
+		Javascript: javascript.MatcherConfig{
+			UseCPEs: true,
+		},
+		Golang: golang.MatcherConfig{
+			UseCPEs: true,
+		},
+		Stock: stock.MatcherConfig{
+			UseCPEs: true,
+		},
+	})
 	allMatches := grype.FindVulnerabilitiesForPackage(store, packagesContext.Distro, matchers, packages)
 
 	doc, err := models.NewDocument(packages, packagesContext, allMatches, nil, s.vulMetadataProvider, nil, s.dbCurator.Status())
