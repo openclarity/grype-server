@@ -27,16 +27,16 @@ build: ## Build Grype Server
 	@(cd grype-server && go mod tidy && go build -o bin/grype-server cmd/grype-server/main.go && ls -l bin/)
 
 
-.PHONY: docker_build
-docker_build: ## Build Grype Server docker image
+.PHONY: docker
+docker: ## Build Grype Server docker image
 	@(echo "Building Grype Server docker image [${DOCKER_IMAGE}:${DOCKER_TAG}] ..." )
 	@(docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} . \
 		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		--build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
 		--build-arg IMAGE_VERSION=${VERSION})
 
-.PHONY: docker.push
-docker.push: docker_build ## Build Grype Server docker image and push it to remote
+.PHONY: docker-push
+docker-push: docker ## Build Grype Server docker image and push it to remote
 	@(echo "Pushing Grype Server docker image [${DOCKER_IMAGE}:${DOCKER_TAG}] ..." )
 	@(docker push ${DOCKER_IMAGE}:${DOCKER_TAG})
 
@@ -48,6 +48,9 @@ api: ## Generating API code
 .PHONY: test
 test: ## Run Unit Tests
 	@(cd grype-server && go test ./pkg/...)
+
+.PHONY: check
+check: test ## Run tests and linters
 
 .PHONY: clean
 clean: ## Clean all build artifacts
