@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/Portshift/grype-server/api/server/models"
+	"github.com/openclarity/grype-server/api/server/models"
 )
 
 // PostScanSBOMOKCode is the HTTP code returned for type PostScanSBOMOK

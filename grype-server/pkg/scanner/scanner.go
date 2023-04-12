@@ -24,7 +24,7 @@ import (
 	"github.com/anchore/syft/syft"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/Portshift/grype-server/grype-server/pkg/rest"
+	"github.com/openclarity/grype-server/grype-server/pkg/rest"
 )
 
 const (

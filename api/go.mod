@@ -1,4 +1,4 @@
-module github.com/Portshift/grype-server/api
+module github.com/openclarity/grype-server/api
 
 go 1.19
 

@@ -3,15 +3,15 @@ package rest
 import (
 	"fmt"
 
-	"github.com/Portshift/grype-server/api/server/models"
+	"github.com/openclarity/grype-server/api/server/models"
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/Portshift/grype-server/api/server/restapi"
-	"github.com/Portshift/grype-server/api/server/restapi/operations"
-	scanner "github.com/Portshift/grype-server/grype-server/pkg/scanner/interface"
+	"github.com/openclarity/grype-server/api/server/restapi"
+	"github.com/openclarity/grype-server/api/server/restapi/operations"
+	scanner "github.com/openclarity/grype-server/grype-server/pkg/scanner/interface"
 )
 
 type Server struct {

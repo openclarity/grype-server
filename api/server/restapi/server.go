@@ -25,7 +25,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/net/netutil"
 
-	"github.com/Portshift/grype-server/api/server/restapi/operations"
+	"github.com/openclarity/grype-server/api/server/restapi/operations"
 )
 
 const (

@@ -1,14 +1,14 @@
-module github.com/Portshift/grype-server/grype-server
+module github.com/openclarity/grype-server/grype-server
 
 go 1.19
 
 require (
 	github.com/Portshift/go-utils v0.0.0-20211114210214-d8e30d7d4673
-	github.com/Portshift/grype-server/api v0.0.0
 	github.com/anchore/grype v0.50.1
 	github.com/anchore/syft v0.56.0
 	github.com/go-openapi/loads v0.21.2
 	github.com/go-openapi/runtime v0.24.1
+	github.com/openclarity/grype-server/api v0.0.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.12.0
 	github.com/urfave/cli v1.22.7
@@ -289,4 +289,4 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-replace github.com/Portshift/grype-server/api v0.0.0 => ./../api
+replace github.com/openclarity/grype-server/api v0.0.0 => ./../api
