@@ -7,14 +7,14 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Portshift/go-utils/healthz"
+	logutils "github.com/Portshift/go-utils/log"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli"
 
-	"github.com/Portshift/go-utils/healthz"
-	logutils "github.com/Portshift/go-utils/log"
-	"github.com/Portshift/grype-server/grype-server/pkg/config"
-	"github.com/Portshift/grype-server/grype-server/pkg/scanner"
+	"github.com/openclarity/grype-server/grype-server/pkg/config"
+	"github.com/openclarity/grype-server/grype-server/pkg/scanner"
 )
 
 const defaultChanSize = 100

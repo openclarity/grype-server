@@ -15,7 +15,7 @@ import (
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 
-	"github.com/Portshift/grype-server/api/client/models"
+	"github.com/openclarity/grype-server/api/client/models"
 )
 
 // NewPostScanSBOMParams creates a new PostScanSBOMParams object,

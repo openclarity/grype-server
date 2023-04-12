@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/validate"
 
-	"github.com/Portshift/grype-server/api/server/models"
+	"github.com/openclarity/grype-server/api/server/models"
 )
 
 // NewPostScanSBOMParams creates a new PostScanSBOMParams object

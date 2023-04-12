@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 
-	"github.com/Portshift/grype-server/api/client/models"
+	"github.com/openclarity/grype-server/api/client/models"
 )
 
 // PostScanSBOMReader is a Reader for the PostScanSBOM structure.
