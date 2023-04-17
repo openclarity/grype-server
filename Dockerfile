@@ -29,14 +29,14 @@ ARG VCS_REF
 LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.name="grype-server" \
     org.label-schema.description="Running Grype scanner as a K8s server" \
-    org.label-schema.url="https://github.com/Portshift/grype-server" \
+    org.label-schema.url="https://github.com/openclarity/grype-server" \
     org.label-schema.vcs-ref=$VCS_REF \
-    org.label-schema.vcs-url="https://github.com/Portshift/grype-server"
+    org.label-schema.vcs-url="https://github.com/openclarity/grype-server"
 
 ### Required OpenShift Labels
 ARG IMAGE_VERSION
 LABEL name="grype-server" \
-      vendor="Portshift" \
+      vendor="openclarity" \
       version=${IMAGE_VERSION} \
       release=${IMAGE_VERSION} \
       summary="Grype scanner as a K8s server" \
