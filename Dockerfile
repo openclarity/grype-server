@@ -13,7 +13,7 @@ RUN go mod download
 COPY grype-server .
 RUN go build -o grype-server ./cmd/grype-server/main.go
 
-FROM alpine:3.16
+FROM alpine:3.17
 
 WORKDIR /app
 
