@@ -32,7 +32,6 @@ const (
 	defaultMavenBaseURL = "https://search.maven.org/solrsearch/select"
 )
 
-
 type Config struct {
 	RestServerPort int
 	DbRootDir      string
@@ -118,7 +117,7 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 		return nil, fmt.Errorf("packagecatalog is empty")
 	}
 
-	packages := grype_pkg.FromCatalog(syftSbom.Artifacts.PackageCatalog, grype_pkg.ProviderConfig{
+	packages := grype_pkg.FromCatalog(syftSbom.Artifacts.PackageCatalog, grype_pkg.SynthesisConfig{
 		GenerateMissingCPEs: true,
 	})
 	packagesContext := grype_pkg.Context{
@@ -142,9 +141,11 @@ func (s *Scanner) scan(packagesContext grype_pkg.Context, packages []grype_pkg.P
 
 	matchers := matcher.NewDefaultMatchers(matcher.Config{
 		Java: java.MatcherConfig{
-			// Disable searching maven external source (this is the default for grype CLI too)
-			SearchMavenUpstream: false,
-			MavenBaseURL: defaultMavenBaseURL,
+			ExternalSearchConfig: java.ExternalSearchConfig{
+				// Disable searching maven external source (this is the default for grype CLI too)
+				SearchMavenUpstream: false,
+				MavenBaseURL:        defaultMavenBaseURL,
+			},
 			UseCPEs: true,
 		},
 		Ruby: ruby.MatcherConfig{
