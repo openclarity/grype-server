@@ -143,7 +143,7 @@ func (s *Scanner) scan(packagesContext grype_pkg.Context, packages []grype_pkg.P
 
 	allMatches, ignoredMatches, err := vulnerabilityMatcher.FindMatches(packages, packagesContext)
 	// We can ignore ErrAboveSeverityThreshold since we are not setting the FailSeverity on the matcher.
-	if err != nil && errors.Is(err, grypeerr.ErrAboveSeverityThreshold) {
+	if err != nil && !errors.Is(err, grypeerr.ErrAboveSeverityThreshold) {
 		return nil, fmt.Errorf("failed to find vulnerabilities: %v", err)
 	}
 
