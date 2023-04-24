@@ -3,6 +3,7 @@ package scanner
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/anchore/grype/grype"
 	"github.com/anchore/grype/grype/db"
+	"github.com/anchore/grype/grype/grypeerr"
 	"github.com/anchore/grype/grype/matcher"
 	"github.com/anchore/grype/grype/matcher/dotnet"
 	"github.com/anchore/grype/grype/matcher/golang"
@@ -21,7 +23,7 @@ import (
 	grype_pkg "github.com/anchore/grype/grype/pkg"
 	"github.com/anchore/grype/grype/presenter/models"
 	"github.com/anchore/grype/grype/store"
-	"github.com/anchore/syft/syft"
+	"github.com/anchore/syft/syft/formats"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/openclarity/grype-server/grype-server/pkg/rest"
@@ -108,7 +110,7 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 	}
 
 	sbomReader := strings.NewReader(sbom)
-	syftSbom, _, err := syft.Decode(sbomReader)
+	syftSbom, _, err := formats.Decode(sbomReader)
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode sbom: %v", err)
 	}
@@ -133,12 +135,27 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 }
 
 func (s *Scanner) scan(packagesContext grype_pkg.Context, packages []grype_pkg.Package) (*models.Document, error) {
-	store := store.Store{
+	vulnerabilityMatcher := createVulnerabilityMatcher(store.Store{
 		Provider:          s.vulProvider,
 		MetadataProvider:  s.vulMetadataProvider,
 		ExclusionProvider: s.exclusionProvider,
+	})
+
+	allMatches, ignoredMatches, err := vulnerabilityMatcher.FindMatches(packages, packagesContext)
+	// We can ignore ErrAboveSeverityThreshold since we are not setting the FailSeverity on the matcher.
+	if err != nil && !errors.Is(err, grypeerr.ErrAboveSeverityThreshold) {
+		return nil, fmt.Errorf("failed to find vulnerabilities: %v", err)
 	}
 
+	doc, err := models.NewDocument(packages, packagesContext, *allMatches, ignoredMatches, s.vulMetadataProvider, nil, s.dbCurator.Status())
+	if err != nil {
+		return nil, fmt.Errorf("failed to create document: %v", err)
+	}
+
+	return &doc, nil
+}
+
+func createVulnerabilityMatcher(store store.Store) *grype.VulnerabilityMatcher {
 	matchers := matcher.NewDefaultMatchers(matcher.Config{
 		Java: java.MatcherConfig{
 			ExternalSearchConfig: java.ExternalSearchConfig{
@@ -167,13 +184,11 @@ func (s *Scanner) scan(packagesContext grype_pkg.Context, packages []grype_pkg.P
 			UseCPEs: true,
 		},
 	})
-	allMatches := grype.FindVulnerabilitiesForPackage(store, packagesContext.Distro, matchers, packages)
-
-	doc, err := models.NewDocument(packages, packagesContext, allMatches, nil, s.vulMetadataProvider, nil, s.dbCurator.Status())
-	if err != nil {
-		return nil, fmt.Errorf("failed to create document: %v", err)
+	return &grype.VulnerabilityMatcher{
+		Store:          store,
+		Matchers:       matchers,
+		NormalizeByCVE: true,
 	}
-	return &doc, nil
 }
 
 const (
