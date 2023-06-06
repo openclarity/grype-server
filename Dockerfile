@@ -1,4 +1,4 @@
-FROM golang:1.20.4-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.20.4-alpine AS builder
 
 RUN apk add --update --no-cache gcc g++
 
@@ -11,7 +11,11 @@ RUN go mod download
 
 # Copy and build backend code
 COPY grype-server .
-RUN go build -o grype-server ./cmd/grype-server/main.go
+
+ARG TARGETOS
+ARG TARGETARCH
+
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o grype-server ./cmd/grype-server/main.go
 
 FROM alpine:3.17
 
