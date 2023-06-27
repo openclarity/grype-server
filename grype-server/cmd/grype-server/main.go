@@ -2,13 +2,15 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
+	"path"
+	"strconv"
 	"syscall"
 
 	"github.com/Portshift/go-utils/healthz"
 	logutils "github.com/Portshift/go-utils/log"
+	"github.com/anchore/grype/grype/vulnerability"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli"
@@ -24,7 +26,7 @@ func run(c *cli.Context) {
 	conf := config.LoadConfig()
 
 	// remove database directory if it exists to avoid using a corrupt database
-	dbDir := fmt.Sprintf("%s/%s", conf.DbRootDir, conf.DbDirName)
+	dbDir := path.Join(conf.DbRootDir, strconv.Itoa(vulnerability.SchemaVersion))
 	if _, err := os.Stat(dbDir); !os.IsNotExist(err) {
 		if err = os.RemoveAll(dbDir); err != nil {
 			log.Fatalf("Unable to delete existing DB directory: %v", err)
@@ -73,7 +75,6 @@ func main() {
 	viper.SetDefault(config.HealthCheckAddress, ":8080")
 	viper.SetDefault(config.DbRootDir, "/app/")
 	viper.SetDefault(config.DbUpdateURL, "https://toolbox-data.anchore.io/grype/databases/listing.json")
-	viper.SetDefault(config.DbDirName, "3")
 	viper.AutomaticEnv()
 
 	app := cli.NewApp()
