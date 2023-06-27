@@ -75,7 +75,6 @@ func main() {
 	viper.SetDefault(config.HealthCheckAddress, ":8080")
 	viper.SetDefault(config.DbRootDir, "/app/")
 	viper.SetDefault(config.DbUpdateURL, "https://toolbox-data.anchore.io/grype/databases/listing.json")
-	viper.SetDefault(config.DbDirName, "3")
 	viper.AutomaticEnv()
 
 	app := cli.NewApp()
