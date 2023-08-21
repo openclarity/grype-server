@@ -22,8 +22,11 @@ FROM alpine:3.17
 WORKDIR /app
 
 COPY --from=builder ["/build/grype-server/grype-server", "./grype-server"]
+COPY entrypoint.sh ./entrypoint.sh
 
-ENTRYPOINT ["/app/grype-server"]
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+CMD ["run"]
 
 USER 1000
 
