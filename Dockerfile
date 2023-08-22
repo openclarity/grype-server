@@ -22,13 +22,17 @@ FROM alpine:3.17
 WORKDIR /app
 
 COPY --from=builder ["/build/grype-server/grype-server", "./grype-server"]
-COPY entrypoint.sh ./entrypoint.sh
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENV DB_ROOT_DIR=/data
+
+RUN mkdir -p $DB_ROOT_DIR \
+    && chown 1000:1000 $DB_ROOT_DIR
+
+USER 1000:1000
+
+ENTRYPOINT ["/app/grype-server"]
 
 CMD ["run"]
-
-USER 1000
 
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
