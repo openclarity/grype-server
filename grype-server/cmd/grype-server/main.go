@@ -73,7 +73,7 @@ func run(c *cli.Context) {
 func main() {
 	viper.SetDefault(config.RestServerPort, "9991")
 	viper.SetDefault(config.HealthCheckAddress, ":8080")
-	viper.SetDefault(config.DbRootDir, "/app/")
+	viper.SetDefault(config.DbRootDir, "./")
 	viper.SetDefault(config.DbUpdateURL, "https://toolbox-data.anchore.io/grype/databases/listing.json")
 	viper.AutomaticEnv()
 

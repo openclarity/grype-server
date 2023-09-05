@@ -23,9 +23,16 @@ WORKDIR /app
 
 COPY --from=builder ["/build/grype-server/grype-server", "./grype-server"]
 
+ENV DB_ROOT_DIR=/data
+
+RUN mkdir -p $DB_ROOT_DIR \
+    && chown 1000:1000 $DB_ROOT_DIR
+
+USER 1000:1000
+
 ENTRYPOINT ["/app/grype-server"]
 
-USER 1000
+CMD ["run"]
 
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE

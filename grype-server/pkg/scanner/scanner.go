@@ -115,11 +115,11 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 		return nil, fmt.Errorf("unable to decode sbom: %v", err)
 	}
 
-	if syftSbom.Artifacts.PackageCatalog == nil {
+	if syftSbom.Artifacts.Packages == nil {
 		return nil, fmt.Errorf("packagecatalog is empty")
 	}
 
-	packages := grype_pkg.FromCatalog(syftSbom.Artifacts.PackageCatalog, grype_pkg.SynthesisConfig{
+	packages := grype_pkg.FromCollection(syftSbom.Artifacts.Packages, grype_pkg.SynthesisConfig{
 		GenerateMissingCPEs: true,
 	})
 	packagesContext := grype_pkg.Context{
