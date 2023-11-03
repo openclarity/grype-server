@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/anchore/clio"
 	"github.com/anchore/grype/grype"
 	"github.com/anchore/grype/grype/db"
 	"github.com/anchore/grype/grype/grypeerr"
@@ -147,7 +148,7 @@ func (s *Scanner) scan(packagesContext grype_pkg.Context, packages []grype_pkg.P
 		return nil, fmt.Errorf("failed to find vulnerabilities: %v", err)
 	}
 
-	doc, err := models.NewDocument(packages, packagesContext, *allMatches, ignoredMatches, s.vulMetadataProvider, nil, s.dbCurator.Status())
+	doc, err := models.NewDocument(clio.Identification{}, packages, packagesContext, *allMatches, ignoredMatches, s.vulMetadataProvider, nil, s.dbCurator.Status())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create document: %v", err)
 	}
