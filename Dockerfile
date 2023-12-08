@@ -17,7 +17,7 @@ ARG TARGETARCH
 
 RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o grype-server ./cmd/grype-server/main.go
 
-FROM alpine:3.18
+FROM alpine:3.19
 
 WORKDIR /app
 
