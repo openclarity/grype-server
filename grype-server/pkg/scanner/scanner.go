@@ -24,7 +24,7 @@ import (
 	grype_pkg "github.com/anchore/grype/grype/pkg"
 	"github.com/anchore/grype/grype/presenter/models"
 	"github.com/anchore/grype/grype/store"
-	"github.com/anchore/syft/syft/formats"
+	"github.com/anchore/syft/syft/format"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/openclarity/grype-server/grype-server/pkg/rest"
@@ -111,7 +111,7 @@ func (s *Scanner) ScanSbomJson(sbom string) (*models.Document, error) {
 	}
 
 	sbomReader := strings.NewReader(sbom)
-	syftSbom, _, err := formats.Decode(sbomReader)
+	syftSbom, _, _, err := format.Decode(sbomReader)
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode sbom: %v", err)
 	}
