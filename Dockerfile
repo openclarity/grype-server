@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.22.5-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.23rc2-alpine AS builder
 
 RUN apk add --update --no-cache gcc g++
 
