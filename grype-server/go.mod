@@ -1,6 +1,6 @@
 module github.com/openclarity/grype-server/grype-server
 
-go 1.22.0
+go 1.23.2
 
 require (
 	github.com/Portshift/go-utils v0.0.0-20211114210214-d8e30d7d4673
