@@ -1,6 +1,6 @@
 module github.com/openclarity/grype-server/api
 
-go 1.19
+go 1.23.2
 
 require (
 	github.com/go-openapi/errors v0.20.3
