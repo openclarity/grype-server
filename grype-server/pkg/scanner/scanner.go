@@ -12,6 +12,7 @@ import (
 	"github.com/anchore/clio"
 	"github.com/anchore/grype/grype"
 	"github.com/anchore/grype/grype/db"
+	"github.com/anchore/grype/grype/db/legacy/distribution"
 	"github.com/anchore/grype/grype/grypeerr"
 	"github.com/anchore/grype/grype/matcher"
 	"github.com/anchore/grype/grype/matcher/dotnet"
@@ -43,7 +44,7 @@ type Config struct {
 
 type Scanner struct {
 	restServer  *rest.Server
-	dbCurator   *db.Curator
+	dbCurator   *distribution.Curator
 	DbRootDir   string
 	DbUpdateURL string
 
@@ -69,7 +70,7 @@ func Create(conf *Config) (*Scanner, error) {
 }
 
 func (s *Scanner) Start(ctx context.Context, errChan chan struct{}) error {
-	dbConfig := &db.Config{
+	dbConfig := &distribution.Config{
 		DBRootDir:           s.DbRootDir,
 		ListingURL:          s.DbUpdateURL,
 		ValidateByHashOnGet: false, // Don't validate the checksum of the DB file after DB update
@@ -236,8 +237,8 @@ func (s *Scanner) startUpdateChecker(ctx context.Context) {
 	}()
 }
 
-func (s *Scanner) loadBb(cfg *db.Config) error {
-	dbCurator, err := db.NewCurator(*cfg)
+func (s *Scanner) loadBb(cfg *distribution.Config) error {
+	dbCurator, err := distribution.NewCurator(*cfg)
 	if err != nil {
 		return fmt.Errorf("failed to create curator: %v", err)
 	}
